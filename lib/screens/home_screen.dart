@@ -9,6 +9,9 @@ import '../providers/note_provider.dart';
 import '../services/sample_stories.dart';
 import '../services/speaker.dart';
 import '../services/voice_input.dart';
+import '../widgets/feature_card.dart';
+import '../widgets/info_chip.dart';
+import '../widgets/story_card.dart';
 import '../widgets/voice_page.dart';
 import 'about_screen.dart';
 import 'language_select_screen.dart';
@@ -444,23 +447,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       );
 
-  Widget _feature(IconData icon, String label) => Container(
-        width: 200,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10)],
-        ),
-        child: Column(children: [
-          Icon(icon, size: 36, color: Colors.indigo),
-          const SizedBox(height: 8),
-          Text(label,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-        ]),
-      );
-
   // Layar sambutan (dibacakan, lalu otomatis ke beranda).
   Widget _intro() => Container(
         decoration: _bgGradient,
@@ -485,11 +471,19 @@ class _HomeScreenState extends State<HomeScreen> {
                   .animate()
                   .fadeIn(delay: 400.ms, duration: 500.ms),
               const SizedBox(height: 24),
-              Wrap(spacing: 14, runSpacing: 14, alignment: WrapAlignment.center, children: [
-                _feature(Icons.keyboard_voice, 'Dikendalikan suara dan tombol spasi'),
-                _feature(Icons.translate, 'Bahasa Bali, Indonesia, dan Inggris'),
-                _feature(Icons.quiz, 'Soal dan evaluasi di setiap cerita'),
-              ]).animate().fadeIn(delay: 700.ms, duration: 600.ms).slideY(begin: 0.15),
+              const Wrap(
+                spacing: 14,
+                runSpacing: 14,
+                alignment: WrapAlignment.center,
+                children: [
+                  FeatureCard(
+                      icon: Icons.keyboard_voice,
+                      label: 'Dikendalikan suara dan tombol spasi'),
+                  FeatureCard(
+                      icon: Icons.translate, label: 'Bahasa Bali, Indonesia, dan Inggris'),
+                  FeatureCard(icon: Icons.quiz, label: 'Soal dan evaluasi di setiap cerita'),
+                ],
+              ).animate().fadeIn(delay: 700.ms, duration: 600.ms).slideY(begin: 0.15),
               const SizedBox(height: 28),
               const SizedBox(
                   width: 260,
@@ -502,20 +496,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ]),
           ),
         ),
-      );
-
-  Widget _chip(IconData icon, String label) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.indigo.shade100),
-        ),
-        child: Row(mainAxisSize: MainAxisSize.min, children: [
-          Icon(icon, size: 16, color: Colors.indigo),
-          const SizedBox(width: 6),
-          Text(label, style: const TextStyle(fontSize: 13, color: Colors.indigo)),
-        ]),
       );
 
   Widget _banner() => Container(
@@ -549,91 +529,57 @@ class _HomeScreenState extends State<HomeScreen> {
         ]),
       );
 
-  Widget _thumb(int i) {
-    final s = _stories[i];
+  /// Alamat gambar thumbnail untuk materi ke-[i].
+  String _thumbFor(int i) {
     var url = i < _thumbs.length ? _thumbs[i] : '';
-    if (url.isEmpty && s.scenes.isNotEmpty) url = s.scenes.first.imageUrl;
-    Widget fallback() => Container(
-          color: Colors.indigo.shade100,
-          child: const Center(child: Icon(Icons.auto_stories, size: 48)),
-        );
-    if (url.isEmpty) return fallback();
-    Widget onError(BuildContext c, Object e, StackTrace? st) => fallback();
-    return url.startsWith('http')
-        ? Image.network(url, fit: BoxFit.cover, errorBuilder: onError)
-        : Image.asset(url, fit: BoxFit.cover, errorBuilder: onError);
+    if (url.isEmpty && _stories[i].scenes.isNotEmpty) {
+      url = _stories[i].scenes.first.imageUrl;
+    }
+    return url;
   }
 
-  Widget _card(int i) {
-    final s = _stories[i];
-    final selected = i == _sel;
-    final cs = Theme.of(context).colorScheme;
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      elevation: selected ? 8 : 3,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
-        side: BorderSide(color: selected ? cs.primary : Colors.transparent, width: 3),
-      ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Expanded(
-          child: Stack(fit: StackFit.expand, children: [
-            _thumb(i),
-            Positioned(
-              left: 10,
-              top: 10,
-              child: CircleAvatar(
-                radius: 18,
-                backgroundColor: Colors.indigo,
-                child: Text('${i + 1}',
-                    style: const TextStyle(
-                        color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-              ),
-            ),
-          ]),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(s.title.bali,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
-            const SizedBox(height: 2),
-            Text('${s.category} • ${s.questionCount} soal',
-                style: TextStyle(color: Colors.indigo.shade700, fontSize: 13)),
-          ]),
-        ),
-      ]),
-    ).animate().fadeIn(delay: (100 * i).ms, duration: 400.ms).slideY(begin: 0.08);
-  }
-
+  // Dua kondisi layout:
+  // compact (lebar < 600) = satu kolom kartu, wide = grid beberapa kolom.
   Widget _content() => Container(
         decoration: _bgGradient,
         child: Column(children: [
           _banner(),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 10, 16, 0),
             child: Wrap(spacing: 8, runSpacing: 8, children: [
-              _chip(Icons.info_outline, 'Ucapkan: tentang'),
-              _chip(Icons.public, 'Ucapkan: wawasan'),
-              _chip(Icons.note_alt_outlined, 'Ucapkan: catatan'),
-              _chip(Icons.person_outline, 'Ucapkan: profil'),
-              _chip(Icons.help_outline, 'Ucapkan: bantuan'),
+              InfoChip(icon: Icons.info_outline, label: 'Ucapkan: tentang'),
+              InfoChip(icon: Icons.public, label: 'Ucapkan: wawasan'),
+              InfoChip(icon: Icons.note_alt_outlined, label: 'Ucapkan: catatan'),
+              InfoChip(icon: Icons.person_outline, label: 'Ucapkan: profil'),
+              InfoChip(icon: Icons.help_outline, label: 'Ucapkan: bantuan'),
             ]),
           ),
           Expanded(
-            child: GridView.builder(
-              padding: const EdgeInsets.all(16),
-              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 380,
-                mainAxisExtent: 300,
-                crossAxisSpacing: 14,
-                mainAxisSpacing: 14,
-              ),
-              itemCount: _stories.length,
-              itemBuilder: (_, i) => _card(i),
-            ),
+            child: LayoutBuilder(builder: (context, c) {
+              final compact = c.maxWidth < 600;
+              return GridView.builder(
+                padding: const EdgeInsets.all(16),
+                gridDelegate: compact
+                    ? const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 1,
+                        mainAxisExtent: 280,
+                        mainAxisSpacing: 14,
+                      )
+                    : const SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: 380,
+                        mainAxisExtent: 300,
+                        crossAxisSpacing: 14,
+                        mainAxisSpacing: 14,
+                      ),
+                itemCount: _stories.length,
+                itemBuilder: (_, i) => StoryCard(
+                  story: _stories[i],
+                  index: i,
+                  selected: i == _sel,
+                  thumbUrl: _thumbFor(i),
+                ),
+              );
+            }),
           ),
         ]),
       );
