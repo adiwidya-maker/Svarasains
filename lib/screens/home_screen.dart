@@ -48,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   static const _backText =
       'Kembali ke beranda. Tekan spasi, lalu sebutkan materi yang ingin kamu pelajari. '
-      'Atau ucapkan tentang, catatan, profil, atau bantuan.';
+      'Atau ucapkan tentang, wawasan, catatan, profil, atau bantuan.';
 
   static const _digits = [
     LogicalKeyboardKey.digit1,
@@ -154,8 +154,9 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     b.write('Untuk memilih materi, tekan tombol spasi satu kali, '
         'lalu sebutkan nomor atau judulnya. '
-        'Selain materi, ada empat menu lain. Semuanya dimulai dengan menekan spasi. '
+        'Selain materi, ada lima menu lain. Semuanya dimulai dengan menekan spasi. '
         'Ucapkan tentang, untuk mendengar penjelasan program. '
+        'Ucapkan wawasan, untuk mendengar ringkasan sains dari Wikipedia. '
         'Ucapkan catatan, untuk membuka catatan belajar. '
         'Ucapkan profil, untuk membuka profil dan pengaturan. '
         'Ucapkan bantuan, untuk mendengar petunjuk. '
@@ -166,6 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _help() => _say('Bantuan. Semua perintah dimulai dengan menekan tombol spasi. '
       'Lalu ucapkan nomor atau judul materi, untuk membuka cerita. '
       'Ucapkan tentang, untuk penjelasan program. '
+      'Ucapkan wawasan, untuk ringkasan sains. '
       'Ucapkan catatan, untuk catatan belajar. '
       'Ucapkan profil, untuk profil dan pengaturan. '
       'Ucapkan ulang, untuk mendengar sambutan beranda lagi.');
@@ -208,6 +210,17 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _openAbout() => _openPage(AboutScreen.spokenText, const AboutScreen());
+
+  // Layar Wawasan Sains membacakan isinya sendiri dan menangani spasi,
+  // jadi tidak dibungkus VoicePage.
+  void _openScience() {
+    _speaker.stop();
+    Navigator.pushNamed(context, '/science').then((_) {
+      if (!mounted) return;
+      _focus.requestFocus();
+      _say(_backText);
+    });
+  }
 
   void _openNotes() {
     final p = Provider.of<NoteProvider>(context, listen: false);
@@ -276,6 +289,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _handleWords(String w) {
+    // 00) wawasan sains (REST API Wikipedia)
+    if (w.contains('wawasan') || w.contains('artikel')) {
+      _openScience();
+      return;
+    }
     // 0) penjelasan program
     if (w.contains('tentang') || w.contains('program') || w.contains('aplikasi')) {
       _say('Membuka penjelasan program.');
@@ -368,6 +386,10 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     if (k == LogicalKeyboardKey.keyT) {
       _openAbout();
+      return KeyEventResult.handled;
+    }
+    if (k == LogicalKeyboardKey.keyW) {
+      _openScience();
       return KeyEventResult.handled;
     }
     if (k == LogicalKeyboardKey.keyH) {
@@ -594,6 +616,7 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
             child: Wrap(spacing: 8, runSpacing: 8, children: [
               _chip(Icons.info_outline, 'Ucapkan: tentang'),
+              _chip(Icons.public, 'Ucapkan: wawasan'),
               _chip(Icons.note_alt_outlined, 'Ucapkan: catatan'),
               _chip(Icons.person_outline, 'Ucapkan: profil'),
               _chip(Icons.help_outline, 'Ucapkan: bantuan'),
