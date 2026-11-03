@@ -1,17 +1,44 @@
-# uts_2415051001_i_gede_adiwidya_utama_5iki_pti_svarasains
+# SvaraSains
 
-A new Flutter project.
+Aplikasi belajar sains lewat cerita rakyat Bali untuk siswa tunanetra dan low vision.
+Seluruh aplikasi dikendalikan dengan suara dan tombol spasi, tanpa mouse.
 
-## Getting Started
+## Fitur
+- Narasi cerita dalam bahasa Bali, Indonesia, dan Inggris (subtitle selalu Bali)
+- Perintah suara dan tombol spasi di semua halaman
+- Penjelasan program yang dibacakan, lalu beranda dengan 4 materi
+- Soal pilihan ganda A sampai D di sela cerita
+- Evaluasi dan persentase nilai di akhir cerita
+- Jawaban kuis tersimpan di Supabase
 
-This project is a starting point for a Flutter application.
+## Teknologi
+- Flutter (web)
+- flutter_tts (suara narator)
+- speech_to_text (perintah suara)
+- flutter_animate (animasi)
+- provider (state)
+- supabase_flutter (database)
 
-A few resources to get you started if this is your first Flutter project:
+## Cara menjalankan
+1. Pasang Flutter SDK
+2. Clone repo ini
+3. Jalankan di folder proyek:
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+   flutter pub get
+   flutter run -d chrome
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Catatan penggunaan
+- Gunakan Chrome dengan internet aktif, lalu izinkan akses mikrofon.
+- Tekan tombol apa saja di layar pertama untuk memulai suara
+  (browser memblokir suara sebelum ada interaksi).
+- Setelah itu tekan spasi sekali, tunggu "Silakan bicara", lalu ucapkan pilihanmu.
+
+## Keterbatasan
+- Teks Bali masih draf dan perlu dikoreksi penutur asli.
+- Suara Bali dibaca oleh suara Indonesia karena batas text-to-speech.
+- Perintah suara bergantung pada browser dan paling stabil di Chrome.
+
+## Identitas
+- Nama: I Gede Adiwidya Utama
+- NIM: 2415051001
+- Kelas: 5 IKI PTI
