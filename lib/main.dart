@@ -13,6 +13,10 @@ import 'screens/progress_notes_screen.dart';
 import 'screens/science_screen.dart';
 import 'services/speaker.dart';
 
+// Bawaan: mouse/sentuhan dimatikan (aplikasi dikendalikan suara dan spasi).
+// Untuk pengujian/screenshot: flutter run -d chrome --dart-define=BLOCK_MOUSE=false
+const bool kBlockMouse = bool.fromEnvironment('BLOCK_MOUSE', defaultValue: true);
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (AppConfig.supabaseReady) {
@@ -51,11 +55,15 @@ class SvaraSainsApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
         useMaterial3: true,
       ),
-      // Mouse dimatikan total: kursor disembunyikan dan semua klik diblokir.
-      builder: (context, child) => MouseRegion(
-        cursor: SystemMouseCursors.none,
-        child: AbsorbPointer(child: child),
-      ),
+      // Mode aksesibilitas: kursor disembunyikan dan klik diblokir.
+      // Bisa dimatikan lewat --dart-define=BLOCK_MOUSE=false (untuk uji/screenshot).
+      builder: (context, child) {
+        if (!kBlockMouse) return child ?? const SizedBox.shrink();
+        return MouseRegion(
+          cursor: SystemMouseCursors.none,
+          child: AbsorbPointer(child: child),
+        );
+      },
       initialRoute: '/',
       routes: {
         '/': (context) => const HomeScreen(),
