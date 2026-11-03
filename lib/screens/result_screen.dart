@@ -60,10 +60,13 @@ class _ResultScreenState extends State<ResultScreen> {
     } catch (e) {
       _error = errorText(e);
     }
-    try {
-      _stats = await _repo.percentages(widget.story.id, _qs.length);
-    } catch (e) {
-      _error ??= errorText(e);
+    // Soal diacak tiap sesi, jadi persentase per nomor soal tidak lagi sebanding.
+    if (!widget.story.isSession) {
+      try {
+        _stats = await _repo.percentages(widget.story.id, _qs.length);
+      } catch (e) {
+        _error ??= errorText(e);
+      }
     }
     if (!mounted) return;
     setState(() => _loading = false);
@@ -146,15 +149,18 @@ class _ResultScreenState extends State<ResultScreen> {
                     fontSize: 16,
                     fontWeight: isCorrect || mine ? FontWeight.bold : FontWeight.normal)),
           ),
-          Text(pct == null ? '-' : '${pct.round()}%',
-              style: const TextStyle(fontWeight: FontWeight.bold)),
+          if (pct != null)
+            Text('${pct.round()}%',
+                style: const TextStyle(fontWeight: FontWeight.bold)),
         ]),
-        const SizedBox(height: 4),
-        LinearProgressIndicator(
-          value: (pct ?? 0) / 100,
-          minHeight: 10,
-          borderRadius: BorderRadius.circular(6),
-        ),
+        if (pct != null) ...[
+          const SizedBox(height: 4),
+          LinearProgressIndicator(
+            value: pct / 100,
+            minHeight: 10,
+            borderRadius: BorderRadius.circular(6),
+          ),
+        ],
         if (isCorrect || mine)
           Padding(
             padding: const EdgeInsets.only(top: 4),
@@ -220,7 +226,7 @@ class _ResultScreenState extends State<ResultScreen> {
                         color: Colors.orange.shade50,
                         child: Padding(
                           padding: const EdgeInsets.all(12),
-                          child: Text('Persentase siswa belum tersedia. $_error'),
+                          child: Text('Terjadi kendala saat menyimpan atau memuat data. $_error'),
                         ),
                       ),
                     for (var i = 0; i < _qs.length; i++)
@@ -248,7 +254,7 @@ class _ResultScreenState extends State<ResultScreen> {
                   color: Colors.indigo,
                   padding: const EdgeInsets.all(14),
                   child: const Text(
-                                        'Tekan [SPASI] untuk kembali ke beranda',
+                    'Tekan [SPASI] untuk kembali ke beranda',
                     style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                   ),
                 ),

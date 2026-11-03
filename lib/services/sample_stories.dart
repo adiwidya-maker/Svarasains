@@ -4,8 +4,38 @@ import '../models/story.dart';
 // CATATAN: teks Bali adalah DRAF. Mohon dikoreksi guru/penutur asli.
 L10n _l(String id, String en, String bali) => L10n(bali: bali, id: id, en: en);
 
+/// Pilihan angka: sama di semua bahasa.
+L10n _n(String s) => L10n(bali: s, id: s, en: s);
+
 StoryScene _s(String id, String en, String bali) =>
     StoryScene(imageUrl: '', narration: _l(id, en, bali));
+
+// Tingkat kelas: A = kelas 2, B = kelas 3-4, C = kelas 5-6.
+const _kA = {GradeBand.a};
+const _kB = {GradeBand.b};
+const _kC = {GradeBand.c};
+const _kAB = {GradeBand.a, GradeBand.b};
+const _kBC = {GradeBand.b, GradeBand.c};
+const _kABC = {GradeBand.a, GradeBand.b, GradeBand.c};
+
+Question _q(
+  int after,
+  Set<GradeBand> grades,
+  L10n text,
+  List<L10n> options,
+  int correct,
+  L10n explanation, {
+  bool keepOrder = false,
+}) =>
+    Question(
+      afterScene: after,
+      grades: grades,
+      text: text,
+      options: options,
+      correctIndex: correct,
+      explanation: explanation,
+      keepOrder: keepOrder,
+    );
 
 final List<Story> sampleStories = [
   // ───────────────────────── 1. Kambing & Macan ─────────────────────────
@@ -59,84 +89,150 @@ final List<Story> sampleStories = [
       ),
     ],
     questions: [
-      Question(
-        afterScene: 1,
-        text: _l('Kambing memakan apa?', 'What does the goat eat?', 'Kambing ngamah napi?'),
-        options: [
+      // Soal lama
+      _q(
+        1, _kAB,
+        _l('Kambing memakan apa?', 'What does the goat eat?', 'Kambing ngamah napi?'),
+        [
           _l('Rumput', 'Grass', 'Padang'),
           _l('Daging', 'Meat', 'Be'),
           _l('Batu', 'Stones', 'Batu'),
           _l('Tulang', 'Bones', 'Tulang'),
         ],
-        correctIndex: 0,
-        explanation: _l(
+        0,
+        _l(
           'Kambing memakan tumbuhan seperti rumput. Hewan pemakan tumbuhan disebut herbivora.',
           'Goats eat plants such as grass. Animals that eat plants are called herbivores.',
           'Kambing ngamah tumbuh-tumbuhan sakadi padang. Buron sané ngamah tumbuhan kaparabin herbivora.',
         ),
       ),
-      Question(
-        afterScene: 3,
-        text: _l('Macan termasuk kelompok hewan apa?', 'Which group of animals does the tiger belong to?', 'Macan kalebet kelompok buron napi?'),
-        options: [
+      _q(
+        3, _kBC,
+        _l('Macan termasuk kelompok hewan apa?', 'Which group of animals does the tiger belong to?', 'Macan kalebet kelompok buron napi?'),
+        [
           _l('Herbivora', 'Herbivore', 'Herbivora'),
           _l('Karnivora', 'Carnivore', 'Karnivora'),
           _l('Omnivora', 'Omnivore', 'Omnivora'),
           _l('Produsen', 'Producer', 'Produsen'),
         ],
-        correctIndex: 1,
-        explanation: _l(
+        1,
+        _l(
           'Macan memakan daging hewan lain, jadi macan adalah karnivora.',
           'Tigers eat the meat of other animals, so they are carnivores.',
           'Macan ngamah be buron lianan, dadosnyane macan karnivora.',
         ),
       ),
-      Question(
-        afterScene: 5,
-        text: _l('Dalam rantai makanan, rumput berperan sebagai apa?', 'In a food chain, what is the role of grass?', 'Ring rantai pangan, padang dados napi?'),
-        options: [
+      _q(
+        5, _kC,
+        _l('Dalam rantai makanan, rumput berperan sebagai apa?', 'In a food chain, what is the role of grass?', 'Ring rantai pangan, padang dados napi?'),
+        [
           _l('Pengurai', 'Decomposer', 'Pengurai'),
           _l('Konsumen tingkat satu', 'Primary consumer', 'Konsumen tingkat satu'),
           _l('Konsumen tingkat dua', 'Secondary consumer', 'Konsumen tingkat kalih'),
           _l('Produsen', 'Producer', 'Produsen'),
         ],
-        correctIndex: 3,
-        explanation: _l(
+        3,
+        _l(
           'Rumput membuat makanannya sendiri dengan bantuan cahaya matahari, sehingga disebut produsen.',
           'Grass makes its own food using sunlight, so it is called a producer.',
           'Padang ngwangun ajengan padewekan nganggen sunar surya, dadosnyane produsen.',
         ),
       ),
-      Question(
-        afterScene: 6,
-        text: _l('Manakah urutan rantai makanan yang benar?', 'Which is the correct food chain order?', 'Napi urutan rantai pangan sané patut?'),
-        options: [
+      _q(
+        6, _kBC,
+        _l('Manakah urutan rantai makanan yang benar?', 'Which is the correct food chain order?', 'Napi urutan rantai pangan sané patut?'),
+        [
           _l('Macan, Kambing, Rumput', 'Tiger, Goat, Grass', 'Macan, Kambing, Padang'),
           _l('Rumput, Macan, Kambing', 'Grass, Tiger, Goat', 'Padang, Macan, Kambing'),
           _l('Rumput, Kambing, Macan', 'Grass, Goat, Tiger', 'Padang, Kambing, Macan'),
           _l('Kambing, Rumput, Macan', 'Goat, Grass, Tiger', 'Kambing, Padang, Macan'),
         ],
-        correctIndex: 2,
-        explanation: _l(
+        2,
+        _l(
           'Rantai makanan dimulai dari produsen: rumput, lalu kambing, lalu macan.',
           'A food chain starts with the producer: grass, then the goat, then the tiger.',
           'Rantai pangan miwiti saking produsen: padang, kambing, wusan macan.',
         ),
       ),
-      Question(
-        afterScene: 7,
-        text: _l('Jika semua rumput di hutan hilang, siapa yang lebih dulu kekurangan makanan?', 'If all the grass in the forest disappeared, who would run out of food first?', 'Yéning padang ring alas telas, sira sané malih nuju kakirangan ajengan?'),
-        options: [
+      _q(
+        7, _kC,
+        _l('Jika semua rumput di hutan hilang, siapa yang lebih dulu kekurangan makanan?', 'If all the grass in the forest disappeared, who would run out of food first?', 'Yéning padang ring alas telas, sira sané malih nuju kakirangan ajengan?'),
+        [
           _l('Kambing', 'The goat', 'Kambing'),
           _l('Macan', 'The tiger', 'Macan'),
           _l('Matahari', 'The sun', 'Surya'),
           _l('Batu', 'Stones', 'Batu'),
         ],
-        correctIndex: 0,
-        explanation: _l(
+        0,
+        _l(
           'Kambing bergantung pada rumput. Jika rumput hilang, kambing kehabisan makanan lebih dulu, lalu macan pun ikut kekurangan.',
           'Goats depend on grass. If the grass disappears, the goat runs out of food first, and then the tiger runs short too.',
           'Kambing ngandelang padang. Yéning padang telas, kambing malih kakirangan ajengan, wusan macan taler.',
+        ),
+      ),
+      // Soal baru
+      _q(
+        0, _kA,
+        _l('Di mana kambing kecil itu tinggal?', 'Where does the little goat live?', 'Dija kambing cenik punika magenah?'),
+        [
+          _l('Hutan', 'Forest', 'Alas'),
+          _l('Laut', 'Sea', 'Segara'),
+          _l('Kota', 'City', 'Kota'),
+          _l('Gurun', 'Desert', 'Gurun'),
+        ],
+        0,
+        _l(
+          'Kambing dalam cerita tinggal di hutan di Bali.',
+          'The goat in the story lives in a forest in Bali.',
+          'Kambing ring satua magenah ring alas ring Bali.',
+        ),
+      ),
+      _q(
+        3, _kA,
+        _l('Siapa yang makan daging?', 'Who eats meat?', 'Sira sané ngamah be?'),
+        [
+          _l('Macan', 'The tiger', 'Macan'),
+          _l('Kambing', 'The goat', 'Kambing'),
+          _l('Rumput', 'The grass', 'Padang'),
+          _l('Matahari', 'The sun', 'Surya'),
+        ],
+        0,
+        _l(
+          'Macan makan daging. Kambing makan rumput.',
+          'The tiger eats meat. The goat eats grass.',
+          'Macan ngamah be. Kambing ngamah padang.',
+        ),
+      ),
+      _q(
+        1, _kAB,
+        _l('Rumput tumbuh subur karena mendapat air hujan dan...', 'Grass grows well because it gets rain and...', 'Padang tumbuh subur sawireh polih yéh ujan lan...'),
+        [
+          _l('Cahaya matahari', 'Sunlight', 'Sunar surya'),
+          _l('Cahaya lampu', 'Lamplight', 'Sunar lampu'),
+          _l('Es', 'Ice', 'Es'),
+          _l('Debu', 'Dust', 'Debu'),
+        ],
+        0,
+        _l(
+          'Rumput membutuhkan air dan cahaya matahari untuk tumbuh.',
+          'Grass needs water and sunlight to grow.',
+          'Padang mabuat yéh lan sunar surya mangda tumbuh.',
+        ),
+      ),
+      _q(
+        7, _kC,
+        _l('Jika semua macan hilang dari hutan, apa yang mungkin terjadi pada jumlah kambing?', 'If all the tigers disappeared from the forest, what might happen to the number of goats?', 'Yéning makejang macan ical saking alas, napi sané prasida kajadian ring cacah kambing?'),
+        [
+          _l('Bertambah banyak', 'It would increase', 'Ngaliunin'),
+          _l('Langsung habis', 'They would disappear at once', 'Énggal telas'),
+          _l('Selalu sama', 'It would always stay the same', 'Setata pateh'),
+          _l('Berubah menjadi macan', 'They would turn into tigers', 'Dados macan'),
+        ],
+        0,
+        _l(
+          'Tanpa pemangsa, kambing bisa bertambah banyak. Kalau terlalu banyak, rumput bisa habis. Karena itu semua makhluk dalam rantai makanan saling berkaitan.',
+          'Without a predator, goats can increase in number. If there are too many, the grass can run out. That is why every living thing in a food chain is connected.',
+          'Tanpa pemangsa, kambing prasida ngaliunin. Yéning liu pisan, padang prasida telas. Punika awinan makejang sané idup ring rantai pangan saling kaiket.',
         ),
       ),
     ],
@@ -183,52 +279,134 @@ final List<Story> sampleStories = [
       ),
     ],
     questions: [
-      Question(
-        afterScene: 1,
-        text: _l('Apa yang dibutuhkan tunas pisang agar bisa tumbuh?', 'What does a banana sprout need in order to grow?', 'Napi sané kabuatang tunas biu mangda dados tumbuh?'),
-        options: [
+      // Soal lama
+      _q(
+        1, _kAB,
+        _l('Apa yang dibutuhkan tunas pisang agar bisa tumbuh?', 'What does a banana sprout need in order to grow?', 'Napi sané kabuatang tunas biu mangda dados tumbuh?'),
+        [
           _l('Air dan cahaya matahari', 'Water and sunlight', 'Yéh lan sunar surya'),
           _l('Hanya batu', 'Only stones', 'Batu dogén'),
           _l('Tempat gelap tanpa air', 'A dark place with no water', 'Genah peteng tanpa yéh'),
           _l('Es batu', 'Ice cubes', 'Es batu'),
         ],
-        correctIndex: 0,
-        explanation: _l(
+        0,
+        _l(
           'Tumbuhan membutuhkan air, cahaya matahari, dan tanah yang subur untuk tumbuh.',
           'Plants need water, sunlight, and fertile soil to grow.',
           'Tumbuhan mabuat yéh, sunar surya, lan tanah sané subur mangda tumbuh.',
         ),
       ),
-      Question(
-        afterScene: 3,
-        text: _l('Bagian tumbuhan yang menyerap air dari dalam tanah adalah...', 'Which part of a plant absorbs water from the soil?', 'Bagian tumbuhan sané nyerep yéh saking tanah inggih punika...'),
-        options: [
+      _q(
+        3, _kBC,
+        _l('Bagian tumbuhan yang menyerap air dari dalam tanah adalah...', 'Which part of a plant absorbs water from the soil?', 'Bagian tumbuhan sané nyerep yéh saking tanah inggih punika...'),
+        [
           _l('Daun', 'The leaves', 'Don'),
           _l('Akar', 'The roots', 'Akar'),
           _l('Buah', 'The fruit', 'Buah'),
           _l('Bunga', 'The flower', 'Sekar'),
         ],
-        correctIndex: 1,
-        explanation: _l(
+        1,
+        _l(
           'Akar menyerap air dan zat hara dari tanah, lalu menyalurkannya ke seluruh bagian tumbuhan.',
           'Roots absorb water and nutrients from the soil and send them to every part of the plant.',
           'Akar nyerep yéh lan zat hara saking tanah, lantas nyaluran ka sakancan bagian tumbuhan.',
         ),
       ),
-      Question(
-        afterScene: 5,
-        text: _l('Manakah urutan pertumbuhan pisang yang benar?', 'Which is the correct growth order of a banana?', 'Napi urutan tumbuh biu sané patut?'),
-        options: [
+      _q(
+        5, _kAB,
+        _l('Manakah urutan pertumbuhan pisang yang benar?', 'Which is the correct growth order of a banana?', 'Napi urutan tumbuh biu sané patut?'),
+        [
           _l('Pohon, Buah, Tunas', 'Tree, Fruit, Sprout', 'Punyan, Buah, Tunas'),
           _l('Buah, Tunas, Pohon', 'Fruit, Sprout, Tree', 'Buah, Tunas, Punyan'),
           _l('Tunas, Pohon, Buah', 'Sprout, Tree, Fruit', 'Tunas, Punyan, Buah'),
           _l('Tunas, Buah, Pohon', 'Sprout, Fruit, Tree', 'Tunas, Buah, Punyan'),
         ],
-        correctIndex: 2,
-        explanation: _l(
+        2,
+        _l(
           'Pisang tumbuh dari tunas, menjadi pohon, lalu berbuah.',
           'A banana grows from a sprout into a tree, and then bears fruit.',
           'Biu tumbuh saking tunas, dados punyan, wusan mabuah.',
+        ),
+      ),
+      // Soal baru
+      _q(
+        0, _kA,
+        _l('Apa yang ditemukan Lutung dan Kekua di tepi sungai?', 'What did Lutung and Kekua find on the riverbank?', 'Napi sané kapanggihin I Lutung teken I Kekua ring pasisi tukad?'),
+        [
+          _l('Tunas pisang', 'A banana sprout', 'Tunas biu'),
+          _l('Batu besar', 'A big rock', 'Batu ageng'),
+          _l('Ikan', 'A fish', 'Be'),
+          _l('Burung', 'A bird', 'Kedis'),
+        ],
+        0,
+        _l(
+          'Mereka menemukan sebuah tunas pisang kecil.',
+          'They found a small banana sprout.',
+          'Ipun manggihin tunas biu sané cenik.',
+        ),
+      ),
+      _q(
+        4, _kA,
+        _l('Siapa yang pandai memanjat pohon pisang?', 'Who is good at climbing the banana tree?', 'Sira sané pradnyan menék punyan biu?'),
+        [
+          _l('Lutung', 'Lutung, the monkey', 'I Lutung'),
+          _l('Kekua', 'Kekua, the turtle', 'I Kekua'),
+          _l('Pisang', 'The banana', 'Biu'),
+          _l('Sungai', 'The river', 'Tukad'),
+        ],
+        0,
+        _l(
+          'Lutung pandai memanjat, sedangkan Kekua tidak bisa memanjat.',
+          'Lutung is good at climbing, while Kekua cannot climb.',
+          'I Lutung pradnyan menék, sakéwala I Kekua nénten dados menék.',
+        ),
+      ),
+      _q(
+        2, _kBC,
+        _l('Daun tumbuh melebar untuk menangkap...', 'Leaves spread wide to catch...', 'Don nglebar mangda prasida nampi...'),
+        [
+          _l('Cahaya matahari', 'Sunlight', 'Sunar surya'),
+          _l('Suara', 'Sound', 'Suara'),
+          _l('Batu', 'Stones', 'Batu'),
+          _l('Bayangan', 'Shadows', 'Bayang-bayang'),
+        ],
+        0,
+        _l(
+          'Daun menangkap cahaya matahari yang dipakai tumbuhan untuk membuat makanan.',
+          'Leaves catch the sunlight that plants use to make food.',
+          'Don nampi sunar surya sané anggén tumbuhan ngwangun ajengan.',
+        ),
+      ),
+      _q(
+        3, _kBC,
+        _l('Bagian tumbuhan yang menopang pohon agar tegak dan mengalirkan air ke daun adalah...', 'Which part of a plant holds the tree upright and carries water to the leaves?', 'Bagian tumbuhan sané nyangga punyan mangda ngadeg tur ngalihang yéh ka don inggih punika...'),
+        [
+          _l('Batang', 'The trunk (stem)', 'Batang'),
+          _l('Bunga', 'The flower', 'Sekar'),
+          _l('Biji', 'The seed', 'Bija'),
+          _l('Buah', 'The fruit', 'Buah'),
+        ],
+        0,
+        _l(
+          'Batang menopang tumbuhan dan mengalirkan air serta zat hara dari akar ke daun.',
+          'The stem supports the plant and carries water and nutrients from the roots to the leaves.',
+          'Batang nyangga tumbuhan tur ngalihang yéh lan zat hara saking akar ka don.',
+        ),
+      ),
+      _q(
+        5, _kC,
+        _l('Tumbuhan membuat makanannya sendiri dengan bantuan cahaya matahari. Proses itu disebut...', 'Plants make their own food using sunlight. This process is called...', 'Tumbuhan ngwangun ajengan padewekan nganggen sunar surya. Prosés punika kaparabin...'),
+        [
+          _l('Fotosintesis', 'Photosynthesis', 'Fotosintesis'),
+          _l('Penguapan', 'Evaporation', 'Penguapan'),
+          _l('Pembuahan', 'Fertilisation', 'Pembuahan'),
+          _l('Pembekuan', 'Freezing', 'Pembekuan'),
+        ],
+        0,
+        _l(
+          'Fotosintesis adalah cara tumbuhan hijau membuat makanan dari air, gas karbon dioksida dari udara, dan cahaya matahari.',
+          'Photosynthesis is how green plants make food from water, carbon dioxide from the air, and sunlight.',
+          'Fotosintesis inggih punika cara tumbuhan gadang ngwangun ajengan saking yéh, gas karbon dioksida saking angin, lan sunar surya.',
         ),
       ),
     ],
@@ -275,26 +453,79 @@ final List<Story> sampleStories = [
       ),
     ],
     questions: [
-      Question(
-        afterScene: 1,
-        text: _l('Mula-mula 3 anak bermain, lalu 2 anak menyusul. Ada berapa anak yang bermain?', 'At first 3 children were playing, then 2 more joined. How many children are playing?', 'Mula 3 oka mabebanggan, lantas 2 oka rauh. Sapunapi akéhnyané oka sané mabebanggan?'),
-        options: [_l('4', '4', '4'), _l('5', '5', '5'), _l('6', '6', '6'), _l('7', '7', '7')],
-        correctIndex: 1,
-        explanation: _l('3 ditambah 2 sama dengan 5.', '3 plus 2 equals 5.', '3 tambah 2 pateh sareng 5.'),
+      // Soal lama
+      _q(
+        1, _kAB,
+        _l('Mula-mula 3 anak bermain, lalu 2 anak menyusul. Ada berapa anak yang bermain?', 'At first 3 children were playing, then 2 more joined. How many children are playing?', 'Mula 3 oka mabebanggan, lantas 2 oka rauh. Sapunapi akéhnyané oka sané mabebanggan?'),
+        [_n('4'), _n('5'), _n('6'), _n('7')],
+        1,
+        _l('3 ditambah 2 sama dengan 5.', '3 plus 2 equals 5.', '3 tambah 2 pateh sareng 5.'),
+        keepOrder: true,
       ),
-      Question(
-        afterScene: 3,
-        text: _l('Ada 6 anak dan setiap anak mendapat 2 pisang. Berapa pisang semuanya?', 'There are 6 children and each child gets 2 bananas. How many bananas are there in all?', 'Wénten 6 oka lan soang-soang polih 2 biu. Sapunapi akéhnyané biu sami?'),
-        options: [_l('10', '10', '10'), _l('14', '14', '14'), _l('12', '12', '12'), _l('8', '8', '8')],
-        correctIndex: 2,
-        explanation: _l('6 kali 2 sama dengan 12, atau 2 ditambah 2 sebanyak enam kali.', '6 times 2 equals 12, or 2 added six times.', '6 kali 2 pateh sareng 12.'),
+      _q(
+        3, _kBC,
+        _l('Ada 6 anak dan setiap anak mendapat 2 pisang. Berapa pisang semuanya?', 'There are 6 children and each child gets 2 bananas. How many bananas are there in all?', 'Wénten 6 oka lan soang-soang polih 2 biu. Sapunapi akéhnyané biu sami?'),
+        [_n('10'), _n('14'), _n('12'), _n('8')],
+        2,
+        _l('6 kali 2 sama dengan 12, atau 2 ditambah 2 sebanyak enam kali.', '6 times 2 equals 12, or 2 added six times.', '6 kali 2 pateh sareng 12.'),
+        keepOrder: true,
       ),
-      Question(
-        afterScene: 4,
-        text: _l('Dari 6 anak, 2 anak pergi ke sawah. Berapa anak yang masih di rumah?', 'Of the 6 children, 2 went to the rice field. How many children are still at home?', 'Saking 6 oka, 2 luas ka carik. Sapunapi akéhnyané oka sané kantun ring umah?'),
-        options: [_l('4', '4', '4'), _l('2', '2', '2'), _l('6', '6', '6'), _l('3', '3', '3')],
-        correctIndex: 0,
-        explanation: _l('6 dikurangi 2 sama dengan 4.', '6 minus 2 equals 4.', '6 kuangin 2 pateh sareng 4.'),
+      _q(
+        4, _kAB,
+        _l('Dari 6 anak, 2 anak pergi ke sawah. Berapa anak yang masih di rumah?', 'Of the 6 children, 2 went to the rice field. How many children are still at home?', 'Saking 6 oka, 2 luas ka carik. Sapunapi akéhnyané oka sané kantun ring umah?'),
+        [_n('4'), _n('2'), _n('6'), _n('3')],
+        0,
+        _l('6 dikurangi 2 sama dengan 4.', '6 minus 2 equals 4.', '6 kuangin 2 pateh sareng 4.'),
+        keepOrder: true,
+      ),
+      // Soal baru
+      _q(
+        0, _kA,
+        _l('Pagi itu ada berapa anak yang sudah bangun?', 'How many children were already awake that morning?', 'Semengan punika sapunapi akéhnyané oka sané sampun bangun?'),
+        [_n('2'), _n('3'), _n('4'), _n('5')],
+        1,
+        _l('3 anak sudah bangun dan bermain di halaman.', '3 children were already up and playing in the yard.', '3 oka sampun bangun tur mabebanggan ring natah.'),
+        keepOrder: true,
+      ),
+      _q(
+        2, _kA,
+        _l('Berapa jumlah semua anak Men Brayut?', 'How many children does Men Brayut have in all?', 'Sapunapi akéhnyané oka Men Brayut sami?'),
+        [_n('4'), _n('5'), _n('6'), _n('7')],
+        2,
+        _l('Anak Men Brayut dalam cerita ini ada 6.', 'Men Brayut has 6 children in this story.', 'Oka Men Brayut ring satua puniki wénten 6.'),
+        keepOrder: true,
+      ),
+      _q(
+        3, _kB,
+        _l('Setiap anak mendapat 2 pisang. Berapa pisang untuk 3 anak?', 'Each child gets 2 bananas. How many bananas for 3 children?', 'Soang-soang oka polih 2 biu. Sapunapi akéhnyané biu anggén 3 oka?'),
+        [_n('4'), _n('5'), _n('6'), _n('8')],
+        2,
+        _l('3 kali 2 sama dengan 6.', '3 times 2 equals 6.', '3 kali 2 pateh sareng 6.'),
+        keepOrder: true,
+      ),
+      _q(
+        3, _kBC,
+        _l('Men Brayut punya 12 pisang dan membaginya sama banyak kepada 6 anak. Setiap anak mendapat berapa pisang?', 'Men Brayut has 12 bananas and shares them equally among 6 children. How many bananas does each child get?', 'Men Brayut madué 12 biu tur ngabagi pateh ring 6 oka. Sapunapi akéhnyané biu sané polih soang-soang oka?'),
+        [_n('1'), _n('2'), _n('3'), _n('4')],
+        1,
+        _l('12 dibagi 6 sama dengan 2.', '12 divided by 6 equals 2.', '12 kabagi 6 pateh sareng 2.'),
+        keepOrder: true,
+      ),
+      _q(
+        4, _kC,
+        _l('Dua anak pergi ke sawah. Empat anak yang di rumah masing-masing makan 2 pisang lagi. Berapa pisang yang mereka makan?', 'Two children went to the rice field. The four children at home each eat 2 more bananas. How many bananas do they eat?', 'Kalih oka luas ka carik. 4 oka sané ring umah soang-soang ngajeng 2 biu malih. Sapunapi akéhnyané biu sané kaajeng?'),
+        [_n('6'), _n('8'), _n('10'), _n('12')],
+        1,
+        _l('4 kali 2 sama dengan 8.', '4 times 2 equals 8.', '4 kali 2 pateh sareng 8.'),
+        keepOrder: true,
+      ),
+      _q(
+        5, _kC,
+        _l('Jika setiap anak makan 3 pisang, berapa pisang yang dibutuhkan 6 anak?', 'If each child eats 3 bananas, how many bananas do 6 children need?', 'Yéning soang-soang oka ngajeng 3 biu, sapunapi akéhnyané biu anggén 6 oka?'),
+        [_n('9'), _n('12'), _n('18'), _n('24')],
+        2,
+        _l('6 kali 3 sama dengan 18.', '6 times 3 equals 18.', '6 kali 3 pateh sareng 18.'),
+        keepOrder: true,
       ),
     ],
   ),
@@ -340,54 +571,150 @@ final List<Story> sampleStories = [
       ),
     ],
     questions: [
-      Question(
-        afterScene: 1,
-        text: _l('Bunyi gamelan terjadi karena benda yang...', 'The sound of the gamelan is made when an object...', 'Suaran gamelan wénten krana sarana sané...'),
-        options: [
+      // Soal lama
+      _q(
+        1, _kBC,
+        _l('Bunyi gamelan terjadi karena benda yang...', 'The sound of the gamelan is made when an object...', 'Suaran gamelan wénten krana sarana sané...'),
+        [
           _l('Diam', 'Stays still', 'Meneng'),
           _l('Bergetar', 'Vibrates', 'Mabyayuh'),
           _l('Dingin', 'Is cold', 'Tis'),
           _l('Basah', 'Is wet', 'Basah'),
         ],
-        correctIndex: 1,
-        explanation: _l(
+        1,
+        _l(
           'Bunyi dihasilkan oleh benda yang bergetar. Itu sebabnya bilah gender terasa bergetar saat dipukul.',
           'Sound is made by vibrating objects. That is why the gender key trembles when it is struck.',
           'Suara wénten saking sarana sané mabyayuh. Punika awinan bilah gender mabyayuh yéning kapukul.',
         ),
       ),
-      Question(
-        afterScene: 3,
-        text: _l('Jika gong dipukul lebih kuat, bunyinya menjadi...', 'If the gong is struck harder, the sound becomes...', 'Yéning gong kapukul langkung kuat, suaranipun dados...'),
-        options: [
+      _q(
+        3, _kABC,
+        _l('Jika gong dipukul lebih kuat, bunyinya menjadi...', 'If the gong is struck harder, the sound becomes...', 'Yéning gong kapukul langkung kuat, suaranipun dados...'),
+        [
           _l('Lebih pelan', 'Softer', 'Langkung aluh'),
           _l('Hilang', 'Gone', 'Ical'),
           _l('Lebih keras', 'Louder', 'Langkung banter'),
           _l('Tidak berubah', 'The same', 'Nénten malih'),
         ],
-        correctIndex: 2,
-        explanation: _l(
+        2,
+        _l(
           'Pukulan yang lebih kuat membuat getaran lebih besar, sehingga bunyi menjadi lebih keras.',
           'A harder strike makes a bigger vibration, so the sound becomes louder.',
           'Pukulan sané langkung kuat ngwetuang mabyayuh sané langkung ageng, dadosnyane suara langkung banter.',
         ),
       ),
-      Question(
-        afterScene: 5,
-        text: _l('Bunyi bisa sampai ke telinga kita karena merambat melalui...', 'Sound reaches our ears because it travels through...', 'Suara prasida kapireng krana mamargi saking...'),
-        options: [
+      _q(
+        5, _kBC,
+        _l('Bunyi bisa sampai ke telinga kita karena merambat melalui...', 'Sound reaches our ears because it travels through...', 'Suara prasida kapireng krana mamargi saking...'),
+        [
           _l('Udara', 'Air', 'Angin'),
           _l('Cahaya', 'Light', 'Sunar'),
           _l('Warna', 'Colour', 'Warna'),
           _l('Bayangan', 'Shadow', 'Bayang-bayang'),
         ],
-        correctIndex: 0,
-        explanation: _l(
+        0,
+        _l(
           'Bunyi merambat melalui zat perantara seperti udara, sehingga sampai ke telinga kita.',
           'Sound travels through a medium such as air, which is how it reaches our ears.',
           'Suara mamargi saking sarana sakadi angin, dadosnyane prasida kapireng.',
         ),
       ),
+      // Soal baru
+      _q(
+        2, _kA,
+        _l('Apa nama alat musik besar yang dipukul Pak Guru?', 'What is the name of the big instrument the teacher struck?', 'Napi arane gamelan ageng sané kapukul antuk guru?'),
+        [
+          _l('Gong', 'Gong', 'Gong'),
+          _l('Sepatu', 'Shoe', 'Sepatu'),
+          _l('Buku', 'Book', 'Buku'),
+          _l('Meja', 'Table', 'Méja'),
+        ],
+        0,
+        _l('Pak guru memukul gong yang besar.', 'The teacher struck the big gong.', 'Guru mukul gong sané ageng.'),
+      ),
+      _q(
+        1, _kA,
+        _l('Made meraba bilah gender yang dipukul. Apa yang ia rasakan?', 'Made touched the gender key that was struck. What did he feel?', 'I Made ngaba-ngaba bilah gender sané kapukul. Napi sané kaparasa?'),
+        [
+          _l('Bergetar', 'It vibrated', 'Mabyayuh'),
+          _l('Basah', 'It was wet', 'Basah'),
+          _l('Panas sekali', 'Very hot', 'Panas pisan'),
+          _l('Sangat berat', 'Very heavy', 'Berat pisan'),
+        ],
+        0,
+        _l(
+          'Bilah yang dipukul bergetar, dan getaran itulah yang menghasilkan bunyi.',
+          'The key that is struck vibrates, and that vibration makes the sound.',
+          'Bilah sané kapukul mabyayuh, tur mabyayuh punika sané ngwetuang suara.',
+        ),
+      ),
+      _q(
+        5, _kA,
+        _l('Bunyi gamelan kita dengar dengan...', 'We hear the sound of the gamelan with our...', 'Suara gamelan kapireng antuk...'),
+        [
+          _l('Telinga', 'Ears', 'Kuping'),
+          _l('Mata', 'Eyes', 'Mata'),
+          _l('Hidung', 'Nose', 'Cunguh'),
+          _l('Kaki', 'Feet', 'Batis'),
+        ],
+        0,
+        _l(
+          'Telinga adalah indra untuk mendengar bunyi.',
+          'The ears are the sense organs for hearing sound.',
+          'Kuping inggih punika indria anggén miragi suara.',
+        ),
+      ),
+      _q(
+        2, _kB,
+        _l('Gong kecil dipukul. Bunyi yang terdengar adalah bunyi yang...', 'The small gong is struck. Its sound is...', 'Gong cenik kapukul. Suaranipun...'),
+        [
+          _l('Tinggi', 'High', 'Inggil'),
+          _l('Rendah', 'Low', 'Endep'),
+          _l('Tidak ada', 'Silent', 'Nénten wénten'),
+          _l('Berwarna merah', 'Red', 'Barak'),
+        ],
+        0,
+        _l(
+          'Gong yang kecil menghasilkan bunyi yang lebih tinggi, sedangkan gong besar menghasilkan bunyi yang lebih rendah.',
+          'The small gong makes a higher sound, while the big gong makes a lower sound.',
+          'Gong cenik ngwetuang suara sané langkung inggil, sakéwala gong ageng ngwetuang suara sané langkung endep.',
+        ),
+      ),
+      _q(
+        4, _kBC,
+        _l('Mengapa bunyi bilah gender berhenti saat dipegang?', 'Why does the sound of a gender key stop when it is held?', 'Napi awinan suara bilah gender mandeg yéning kaecélang?'),
+        [
+          _l('Getarannya tertahan', 'Its vibration is stopped', 'Mabyayuhné kagebug'),
+          _l('Bilahnya hilang', 'The key disappears', 'Bilahé ical'),
+          _l('Hari menjadi gelap', 'It gets dark', 'Dados peteng'),
+          _l('Bilahnya menjadi dingin', 'The key turns cold', 'Bilahé dados tis'),
+        ],
+        0,
+        _l(
+          'Bunyi berhenti ketika getarannya berhenti.',
+          'The sound stops when the vibration stops.',
+          'Suara mandeg yéning mabyayuhné mandeg.',
+        ),
+      ),
+      _q(
+        5, _kC,
+        _l('Di ruang hampa udara, bunyi gamelan tidak bisa terdengar. Mengapa?', 'In a vacuum with no air, the sound of the gamelan cannot be heard. Why?', 'Ring genah tanpa angin, suara gamelan nénten kapireng. Napi awinannya?'),
+        [
+          _l('Bunyi membutuhkan zat perantara seperti udara', 'Sound needs a medium such as air', 'Suara mabuat sarana sakadi angin'),
+          _l('Gamelan menjadi kecil', 'The gamelan shrinks', 'Gamelané dados cenik'),
+          _l('Telinga berhenti bekerja', 'Ears stop working', 'Kuping mandeg makarya'),
+          _l('Bunyi berubah menjadi cahaya', 'Sound turns into light', 'Suara dados sunar'),
+        ],
+        0,
+        _l(
+          'Bunyi merambat melalui zat perantara. Tanpa udara, bunyi tidak bisa sampai ke telinga.',
+          'Sound travels through a medium. Without air, sound cannot reach our ears.',
+          'Suara mamargi saking sarana. Tanpa angin, suara nénten prasida kapireng.',
+        ),
+      ),
     ],
   ),
 ];
+
+

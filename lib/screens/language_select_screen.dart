@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import '../models/story.dart';
 import '../services/speaker.dart';
 import '../services/voice_input.dart';
-import 'story_player_screen.dart';
+import 'grade_select_screen.dart';
 
 class LanguageSelectScreen extends StatefulWidget {
   final Story story;
@@ -65,7 +65,7 @@ class _LanguageSelectScreenState extends State<LanguageSelectScreen> {
     _speaker.stop();
     Navigator.of(context)
         .push(MaterialPageRoute(
-            builder: (_) => StoryPlayerScreen(story: widget.story, lang: lang)))
+            builder: (_) => GradeSelectScreen(story: widget.story, lang: lang)))
         .then((_) {
       if (mounted) _focus.requestFocus();
     });
@@ -206,3 +206,4 @@ class _LanguageSelectScreenState extends State<LanguageSelectScreen> {
     );
   }
 }
+
