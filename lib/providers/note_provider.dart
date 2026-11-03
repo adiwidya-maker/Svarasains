@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../config/app_config.dart';
 
 class StudentNote {
   final String id;
@@ -16,9 +19,22 @@ class StudentNote {
     required this.rating,
     required this.createdAt,
   });
+
+  /// Baris tabel student_notes -> objek Dart.
+  factory StudentNote.fromMap(Map<String, dynamic> m) => StudentNote(
+        id: '${m['id']}',
+        studentId: '${m['student_id']}',
+        moduleName: '${m['module_title']}',
+        noteContent: '${m['note']}',
+        rating: (m['rating'] as num?)?.toInt() ?? 5,
+        createdAt: '${m['created_at']}',
+      );
 }
 
 class NoteProvider with ChangeNotifier {
+  static const _table = 'student_notes';
+  static const _studentId = '2415051001';
+
   List<StudentNote> _notes = [];
   bool _isLoading = false;
   String? _errorMessage;
@@ -27,37 +43,42 @@ class NoteProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
+  SupabaseClient get _db {
+    if (!AppConfig.supabaseReady) {
+      throw Exception('Supabase belum dikonfigurasi (cek app_config.dart).');
+    }
+    return Supabase.instance.client;
+  }
+
+  String _msg(Object e) => e is PostgrestException ? e.message : '$e';
+
+  // READ
   Future<void> fetchNotes() async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      await Future.delayed(const Duration(milliseconds: 500));
-      if (_notes.isEmpty) {
-        _notes = [
-          StudentNote(
-            id: '1',
-            studentId: '2415051001',
-            moduleName: 'I Kambing teken I Macan',
-            noteContent: 'Siswa dapat menyebutkan hewan karnivora dengan sangat baik.',
-            rating: 5,
-            createdAt: DateTime.now().toString(),
-          ),
-        ];
-      }
+      final rows = await _db
+          .from(_table)
+          .select()
+          .eq('student_id', _studentId)
+          .order('created_at', ascending: false);
+      _notes = [for (final r in rows) StudentNote.fromMap(r)];
     } catch (e) {
-      _errorMessage = 'Gagal mengambil catatan: $e';
+      _errorMessage = 'Gagal mengambil catatan: ${_msg(e)}';
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
+  // --- Tahap 2-4 menggantikan tiga fungsi di bawah ini ---
+
   Future<void> addNote(String moduleName, String noteContent, int rating) async {
     final newNote = StudentNote(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      studentId: '2415051001',
+      studentId: _studentId,
       moduleName: moduleName,
       noteContent: noteContent,
       rating: rating,
