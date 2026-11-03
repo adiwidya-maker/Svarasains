@@ -18,7 +18,7 @@ Project UTS Pemrograman Mobile, tema: *SvaraSains: Akselerasi Pembelajaran STEM 
 - Narasi dalam bahasa Bali, Indonesia, dan Inggris; subtitle tetap Bali
 - Perintah suara: tekan spasi, lalu ucapkan pilihan
 - Soal pilihan ganda di sela cerita, evaluasi dan persentase di akhir
-- Catatan belajar (CRUD) tersimpan di database
+- Catatan belajar (CRUD) tersimpan di database, diisi oleh guru pendamping
 - Artikel sains dari REST API
 - Loading, error, dan empty state
 - Tata letak responsif (compact dan wide)
@@ -60,12 +60,12 @@ Supabase (PostgreSQL)
 
 | Kolom | Keterangan |
 |---|---|
-| id | primary key |
+| id | primary key (uuid) |
 | student_id | identitas siswa |
 | module_title | judul materi |
-| note | isi catatan |
-| quiz_score | skor kuis |
-| rating | penilaian siswa |
+| note | isi catatan evaluasi atau progres |
+| quiz_score | skor kuis (opsional) |
+| rating | penilaian pemahaman siswa 1-5 oleh guru pendamping |
 | created_at | waktu dibuat |
 
 **Tabel `quiz_answers`** (jawaban kuis)
@@ -100,6 +100,7 @@ lib/
 ```
 
 ## Screenshot
+
 | Home | List | Detail |
 |---|---|---|
 | ![Home](screenshots/home.png) | ![List](screenshots/list.png) | ![Detail](screenshots/detail.png) |
@@ -125,8 +126,17 @@ Persyaratan: Flutter SDK terpasang, Chrome (atau emulator/perangkat Android), da
 3. Isi URL dan anon key Supabase di `lib/config/app_config.dart`
    (jangan memakai service_role key)
 4. Jalankan skema SQL (tabel `student_notes` dan `quiz_answers`) di Supabase SQL Editor
-5. Jalankan aplikasi: `flutter run -d chrome`
+5. Jalankan dalam mode aksesibilitas (mouse dimatikan, dikendalikan suara dan spasi):
+   `flutter run -d chrome`
+6. Untuk menguji dengan mouse, misalnya CRUD catatan di layar `/#/notes`:
+   `flutter run -d chrome --dart-define=BLOCK_MOUSE=false`
+
+### Catatan untuk penguji
+
+- Secara bawaan klik mouse dan sentuhan sengaja diblokir karena aplikasi dirancang untuk siswa tunanetra yang memakai suara dan spasi. Gunakan perintah pada langkah 6 untuk menguji tombol dengan mouse.
+- Layar Catatan Progres dapat dibuka langsung melalui alamat `/#/notes` pada Chrome.
+- Di layar itu tombol `+` menambah catatan, ikon pensil mengubah, dan ikon tempat sampah menghapus (dengan dialog konfirmasi).
 
 ## APK
 
-[ISI: link Google Drive APK `https://drive.google.com/file/d/1ZS6EWMQIgU74YlAjosg3EbDWAhWSax_Q/view`]
+Unduh APK: [UTS_2415051001_IGedeAdiwidyaUtama.apk](https://drive.google.com/file/d/1ZS6EWMQIgU74YlAjosg3EbDWAhWSax_Q/view)
