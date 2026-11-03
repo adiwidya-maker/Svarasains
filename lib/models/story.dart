@@ -9,6 +9,14 @@ extension NarrationLangX on NarrationLang {
 
   /// Belum ada suara TTS bahasa Bali, jadi teks Bali dibaca suara Indonesia.
   String get ttsLocale => this == NarrationLang.en ? 'en-US' : 'id-ID';
+  String get sttLocale => this == NarrationLang.en ? 'en_US' : 'id_ID';
+
+  /// Pilih teks sesuai bahasa narasi.
+  String t(String id, String en, String bali) => switch (this) {
+        NarrationLang.bali => bali,
+        NarrationLang.id => id,
+        NarrationLang.en => en,
+      };
 }
 
 class L10n {
@@ -24,26 +32,28 @@ class L10n {
       };
 }
 
+/// Satu adegan cerita (mengalir terus, tidak harus ada soal).
+class StoryScene {
+  final String imageUrl;
+  final L10n narration;
+  const StoryScene({required this.imageUrl, required this.narration});
+}
+
+/// Soal disisipkan SETELAH adegan ke-[afterScene] (index mulai 0).
 class Question {
   final L10n text;
   final List<L10n> options; // 4 opsi: A, B, C, D
   final int correctIndex;
   final L10n explanation;
+  final int afterScene;
 
   const Question({
     required this.text,
     required this.options,
     required this.correctIndex,
     required this.explanation,
+    required this.afterScene,
   });
-}
-
-class StoryPart {
-  final String imageUrl;
-  final L10n narration;
-  final Question? question;
-
-  const StoryPart({required this.imageUrl, required this.narration, this.question});
 }
 
 class Story {
@@ -52,7 +62,9 @@ class Story {
   final String category;
   final String description;
   final String coverUrl;
-  final List<StoryPart> parts;
+  final List<String> voiceKeys; // kata kunci untuk perintah suara
+  final List<StoryScene> scenes;
+  final List<Question> questions; // urut berdasarkan afterScene
 
   const Story({
     required this.id,
@@ -60,11 +72,10 @@ class Story {
     required this.category,
     required this.description,
     required this.coverUrl,
-    required this.parts,
+    required this.voiceKeys,
+    required this.scenes,
+    required this.questions,
   });
-
-  List<Question> get questions =>
-      parts.where((p) => p.question != null).map((p) => p.question!).toList();
 
   int get questionCount => questions.length;
 }

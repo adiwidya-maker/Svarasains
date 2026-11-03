@@ -19,10 +19,12 @@ class _ModuleDetailScreenState extends State<ModuleDetailScreen> {
     _initTts();
   }
 
-  void _initTts() async {
+    void _initTts() async {
     await _tts.setLanguage("id-ID");
     await _tts.setSpeechRate(0.45);
-    final selectedModule = Provider.of<ModuleProvider>(context, listen: false).selectedModule;
+    if (!mounted) return;
+    final selectedModule =
+        Provider.of<ModuleProvider>(context, listen: false).selectedModule;
     if (selectedModule != null) {
       _tts.speak("Memutar cerita ${selectedModule.title}. ${selectedModule.narration}");
     }

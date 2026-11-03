@@ -23,7 +23,6 @@ class ResultScreen extends StatefulWidget {
 
 class _ResultScreenState extends State<ResultScreen> {
   static const _letters = ['A', 'B', 'C', 'D'];
-  static const _id = 'id-ID';
 
   final Speaker _speaker = Speaker();
   final QuizRepository _repo = QuizRepository();
@@ -33,6 +32,8 @@ class _ResultScreenState extends State<ResultScreen> {
   String? _error;
   List<List<double>>? _stats;
 
+  NarrationLang get _l => widget.lang;
+  String _t(String id, String en, String bali) => _l.t(id, en, bali);
   List<Question> get _qs => widget.story.questions;
 
   int get _correct {
@@ -70,28 +71,38 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   void _speakResult() {
+    final loc = _l.ttsLocale;
+    final n = _qs.length;
     final items = <Utterance>[
       Utterance(
-          'Cerita selesai. Kamu menjawab $_correct dari ${_qs.length} soal dengan benar. '
-          'Berikut evaluasi tiap soal. Tekan spasi kapan saja untuk kembali ke beranda.',
-          _id),
+          _t(
+            'Cerita selesai. Kamu menjawab $_correct dari $n soal dengan benar. Berikut evaluasi tiap soal. Tekan spasi kapan saja untuk kembali ke beranda.',
+            'The story is over. You answered $_correct of $n questions correctly. Here is the evaluation of each question. Press space at any time to return home.',
+            'Satua sampun puput. Semeton nyawis $_correct saking $n pitakén sané patut. Puniki evaluasi soang-soang pitakén. Pencet spasi mangda mawali ka beranda.',
+          ),
+          loc),
     ];
-    for (var i = 0; i < _qs.length; i++) {
+    for (var i = 0; i < n; i++) {
       final q = _qs[i];
-      final b = StringBuffer('Soal ${i + 1}. ${q.text.id} '
-          'Jawaban yang benar adalah ${_letters[q.correctIndex]}, ${q.options[q.correctIndex].id}.');
+      final b = StringBuffer(
+          '${_t('Soal', 'Question', 'Pitakén')} ${i + 1}. ${q.text.of(_l)} ');
+      b.write(_t(
+        'Jawaban yang benar adalah ${_letters[q.correctIndex]}, ${q.options[q.correctIndex].of(_l)}.',
+        'The correct answer is ${_letters[q.correctIndex]}, ${q.options[q.correctIndex].of(_l)}.',
+        'Jawaban sané patut inggih punika ${_letters[q.correctIndex]}, ${q.options[q.correctIndex].of(_l)}.',
+      ));
       if (i < widget.answers.length) {
-        b.write(' Kamu memilih ${_letters[widget.answers[i]]}.');
+        b.write(' ${_t('Kamu memilih', 'You chose', 'Semeton milih')} ${_letters[widget.answers[i]]}.');
       }
       final s = _stats?[i];
       if (s != null) {
-        b.write(' Persentase siswa yang memilih: ');
+        b.write(' ${_t('Persentase siswa yang memilih:', 'Percentage of students who chose each option:', 'Persentase murid sané milih:')} ');
         for (var j = 0; j < q.options.length; j++) {
-          b.write('${_letters[j]}, ${s[j].round()} persen. ');
+          b.write('${_letters[j]}, ${s[j].round()} ${_t('persen', 'percent', 'persén')}. ');
         }
       }
-      b.write(' ${q.explanation.id}');
-      items.add(Utterance(b.toString(), _id));
+      b.write(' ${q.explanation.of(_l)}');
+      items.add(Utterance(b.toString(), loc));
     }
     _speaker.say(items);
   }
@@ -104,13 +115,17 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   KeyEventResult _onKey(FocusNode node, KeyEvent e) {
+    if (e.logicalKey == LogicalKeyboardKey.tab) return KeyEventResult.handled;
     if (e is! KeyDownEvent) return KeyEventResult.ignored;
-    if (e.logicalKey == LogicalKeyboardKey.space) {
+    final k = e.logicalKey;
+    if (k == LogicalKeyboardKey.space ||
+        k == LogicalKeyboardKey.escape ||
+        k == LogicalKeyboardKey.enter) {
       _speaker.stop();
       Navigator.of(context).popUntil((r) => r.isFirst);
       return KeyEventResult.handled;
     }
-    if (e.logicalKey == LogicalKeyboardKey.keyR && !_loading) {
+    if (k == LogicalKeyboardKey.keyR && !_loading) {
       _speakResult();
       return KeyEventResult.handled;
     }
@@ -126,7 +141,7 @@ class _ResultScreenState extends State<ResultScreen> {
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
           Expanded(
-            child: Text('${_letters[j]}.  ${q.options[j].id}',
+            child: Text('${_letters[j]}.  ${q.options[j].of(_l)}',
                 style: TextStyle(
                     fontSize: 16,
                     fontWeight: isCorrect || mine ? FontWeight.bold : FontWeight.normal)),
@@ -215,14 +230,14 @@ class _ResultScreenState extends State<ResultScreen> {
                           child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Soal ${i + 1}: ${_qs[i].text.id}',
+                                Text('Soal ${i + 1}: ${_qs[i].text.of(_l)}',
                                     style: const TextStyle(
                                         fontSize: 17, fontWeight: FontWeight.bold)),
                                 const SizedBox(height: 12),
                                 for (var j = 0; j < _qs[i].options.length; j++)
                                   _option(_qs[i], i, j),
                                 const Divider(),
-                                Text('Penjelasan: ${_qs[i].explanation.id}'),
+                                Text('Penjelasan: ${_qs[i].explanation.of(_l)}'),
                               ]),
                         ),
                       ),
@@ -233,7 +248,7 @@ class _ResultScreenState extends State<ResultScreen> {
                   color: Colors.indigo,
                   padding: const EdgeInsets.all(14),
                   child: const Text(
-                    'Tekan [SPASI] untuk kembali ke beranda  •  R = ulangi bacaan',
+                                        'Tekan [SPASI] untuk kembali ke beranda',
                     style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                   ),
                 ),
