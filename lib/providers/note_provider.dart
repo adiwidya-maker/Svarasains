@@ -52,7 +52,7 @@ class NoteProvider with ChangeNotifier {
 
   String _msg(Object e) => e is PostgrestException ? e.message : '$e';
 
-  // READ
+  // ── READ ───────────────────────────────────────────────
   Future<void> fetchNotes() async {
     _isLoading = true;
     _errorMessage = null;
@@ -73,38 +73,59 @@ class NoteProvider with ChangeNotifier {
     }
   }
 
-  // --- Tahap 2-4 menggantikan tiga fungsi di bawah ini ---
-
-  Future<void> addNote(String moduleName, String noteContent, int rating) async {
-    final newNote = StudentNote(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      studentId: _studentId,
-      moduleName: moduleName,
-      noteContent: noteContent,
-      rating: rating,
-      createdAt: DateTime.now().toString(),
-    );
-    _notes.insert(0, newNote);
-    notifyListeners();
-  }
-
-  Future<void> updateNote(String id, String newContent, int newRating) async {
-    final index = _notes.indexWhere((note) => note.id == id);
-    if (index != -1) {
-      _notes[index] = StudentNote(
-        id: id,
-        studentId: _notes[index].studentId,
-        moduleName: _notes[index].moduleName,
-        noteContent: newContent,
-        rating: newRating,
-        createdAt: _notes[index].createdAt,
-      );
+  // ── CREATE ─────────────────────────────────────────────
+  Future<bool> addNote(String moduleName, String noteContent, int rating) async {
+    _errorMessage = null;
+    try {
+      final row = await _db.from(_table).insert({
+        'student_id': _studentId,
+        'module_title': moduleName,
+        'note': noteContent,
+        'rating': rating,
+      }).select().single();
+      _notes.insert(0, StudentNote.fromMap(row));
       notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = 'Gagal menambah catatan: ${_msg(e)}';
+      notifyListeners();
+      return false;
     }
   }
 
-  Future<void> deleteNote(String id) async {
-    _notes.removeWhere((note) => note.id == id);
-    notifyListeners();
+  // ── UPDATE ─────────────────────────────────────────────
+  Future<bool> updateNote(String id, String newContent, int newRating) async {
+    _errorMessage = null;
+    try {
+      final row = await _db
+          .from(_table)
+          .update({'note': newContent, 'rating': newRating})
+          .eq('id', id)
+          .select()
+          .single();
+      final i = _notes.indexWhere((n) => n.id == id);
+      if (i != -1) _notes[i] = StudentNote.fromMap(row);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = 'Gagal memperbarui catatan: ${_msg(e)}';
+      notifyListeners();
+      return false;
+    }
+  }
+
+  // ── DELETE ─────────────────────────────────────────────
+  Future<bool> deleteNote(String id) async {
+    _errorMessage = null;
+    try {
+      await _db.from(_table).delete().eq('id', id);
+      _notes.removeWhere((n) => n.id == id);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = 'Gagal menghapus catatan: ${_msg(e)}';
+      notifyListeners();
+      return false;
+    }
   }
 }
